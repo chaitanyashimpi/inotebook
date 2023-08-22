@@ -1,9 +1,9 @@
-const connection = require ('./db.js')
 const express = require('express')
+const connection = require ('./db.js')
 
 connection()
 const app = express()
-const port = 3000
+const port = 5000
 
 // Middleware
 app.use(express.json())
