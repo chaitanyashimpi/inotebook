@@ -1,32 +1,57 @@
 const express = require('express');
-const Notes = require('../models/Notes');
+const fetchuser = require('../middleware/fetchuser');
 const router = express.Router();
+
+const Notes = require('../models/Notes');
 
 const { body, validationResult } = require('express-validator');
 
-router.post('/', [body('title').isLength({ min: 5 })], (req, res) => {
-	const errors = validationResult(req);
+// Route 1: Get all the notes: GET "/api/notes/fetchallnotes"
+router.get('/fetchallnotes', fetchuser, async (req, res) => {
+	try {
+		const notes = await Notes.find({ user: req.user.id });
 
-	if (!errors.isEmpty()) {
-		return res.status(400).json({ errors: errors.array() });
+		res.json(notes);
+	} catch (error) {
+		console.error(error.message);
+		res.status(500).send('Internal Server Error');
 	}
-
-	Notes.create({
-		title: req.body.title,
-		description: req.body.description,
-		tags: req.body.tag,
-		date: req.body.date,
-	})
-		.then((notes) => res.json(notes))
-		.catch((err) => {
-			res.json({ error: 'Please enter unique value for email' });
-			console.error(err);
-		});
-
-	// console.log(req.body);
-	// const notes = Notes(req.body);
-	// notes.save();
-	// res.send(req.body);
 });
+
+// Route 2: Add a new note: POST "/api/notes/addNote" Login Required
+
+router.post(
+	'/addNote',
+	fetchuser,
+	[
+		body('title', 'Enter a valid title').isLength({ min: 3 }),
+		body('description', 'Description must be atleast 5 characters').isLength({
+			min: 5,
+		}),
+	],
+	async (req, res) => {
+		const { title, description, tag } = req.body;
+
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
+
+		try {
+			const notes = new Notes({
+				title,
+				description,
+				tag,
+				user: req.user.id,
+			});
+			const savedNote = await notes.save();
+
+			res.json(notes);
+		} catch (error) {
+			console.error(error.message);
+			res.status(500).send('Internal Server Error');
+		}
+	}
+);
 
 module.exports = router;
