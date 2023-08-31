@@ -1,11 +1,13 @@
 const express = require('express')
 const connection = require ('./db.js')
+let cors = require('cors')
 
 connection()
 const app = express()
 const port = 5000
 
 // Middleware
+app.use(cors())
 app.use(express.json())
 
 // Available Routes

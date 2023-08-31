@@ -1,14 +1,15 @@
-import React, { useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-
-
+import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
-	let location = useLocation()
-	
-	useEffect(() => {
-		// Google Analytics
-	  }, [location]);
+	let location = useLocation();
+	let navigate = useNavigate();
+
+	const logout = () => {
+		localStorage.removeItem('token')
+		navigate('/login')
+	} 
+
 	return (
 		<nav className='navbar navbar-expand-lg  navbar-dark bg-dark'>
 			<div className='container-fluid'>
@@ -33,7 +34,9 @@ const Navbar = () => {
 					<ul className='navbar-nav me-auto mb-2 mb-lg-0'>
 						<li className='nav-item'>
 							<Link
-								className={`nav-link ${location.pathname === "/"? "active" : ""}`}
+								className={`nav-link ${
+									location.pathname === '/' ? 'active' : ''
+								}`}
 								aria-current='page'
 								to='/'>
 								Home
@@ -41,27 +44,31 @@ const Navbar = () => {
 						</li>
 						<li className='nav-item'>
 							<Link
-								className={`nav-link ${location.pathname === "/about"? "active" : ""}`}
+								className={`nav-link ${
+									location.pathname === '/about' ? 'active' : ''
+								}`}
 								to='/about'>
 								About Us
 							</Link>
 						</li>
 					</ul>
-					<form
+					<div
 						className='d-flex'
 						role='search'>
-						<input
-							className='form-control me-2'
-							type='search'
-							placeholder='Search'
-							aria-label='Search'
-						/>
-						<button
-							className='btn btn-outline-success'
-							type='submit'>
-							Search
-						</button>
-					</form>
+							{!localStorage.getItem('token')?<><Link
+							to='/login'
+							className='btn btn-primary mx-1'
+							>
+							Login
+						</Link>
+						<Link
+							to='/signup'
+							className='btn btn-primary mx-1'
+							>
+							Signup
+						</Link></>: <><button className='btn btn-danger mx-1' onClick={logout}>Logout</button></>}
+						
+					</div>
 				</div>
 			</div>
 		</nav>
